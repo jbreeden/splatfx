@@ -7,26 +7,22 @@
   // Imports
   // -------
   var System = java.lang.System;
-  
-  global.fx = {};
-  
-  // Imports
-  // -------
-
   var Application = Packages.javafx.application.Application;
-  var JsApplication = Packages.com.github.jsfx.JsApplication;
+  var ApplicationAdapter = Packages.com.github.crossfx.ApplicationAdapter;
   var File = java.io.File;
-  
+
+  global.fx = {};
+
   // FX Launch Method
   // ----------------
   
   fx.launch = function(onStart){
-    JsApplication.onStart = function(stage){
+    ApplicationAdapter.onStart = function (stage) {
       importJavaFxTypes();
       onStart(stage);
     };
-    var JsApplicationClass = java.lang.Class.forName('com.github.jsfx.JsApplication');
-    Application.launch(JsApplicationClass, []);
+    var ApplicationAdapterClass = java.lang.Class.forName('com.github.crossfx.ApplicationAdapter');
+    Application.launch(ApplicationAdapterClass, []);
   }
   
   // FX Controller
@@ -48,8 +44,8 @@
   controllerMixin.fxml = function (path) {
     var SystemClass = java.lang.Class.forName('java.lang.System');
     
-    // Create the JsController to send to JsFXMLLoader
-    var jsController = buildJsController(this);
+    // Create the ControllerAdapter to send to the CrossFXMLLoader
+    var controllerAdapter = buildControllerAdapter(this);
     
     var fxmlUrl;
     
@@ -69,8 +65,8 @@
     }
     
     // Load the fxml
-    var fxmlLoader = this.fxmlLoader() || new fx.JsFXMLLoader(fxmlUrl);
-    fxmlLoader.controller = jsController;
+    var fxmlLoader = this.fxmlLoader() || new fx.CrossFxmlLoader(fxmlUrl);
+    fxmlLoader.controller = controllerAdapter;
     this.fxmlLoader(fxmlLoader);
     this.scene = new fx.Scene(fxmlLoader.load());
     return this;
@@ -129,29 +125,29 @@
     }
   }
 
-  // Converts a JavaScript controller object into the java Class "JsController"
-  // The JsController holds a hash of the available methods and nested controllers.
-  function buildJsController(controller){
-    var jsController = new Packages.com.github.jsfx.JsController();
+  // Converts a JavaScript controller object into the java Class "ControllerAdapter"
+  // The ControllerAdapter holds a hash of the available methods and nested controllers.
+  function buildControllerAdapter(controller){
+    var controllerAdapter = new Packages.com.github.crossfx.ControllerAdapter();
     
-    jsController.onSetFxmlLoader(function (fxmlLoader) {
+    controllerAdapter.onSetFxmlLoader(function (fxmlLoader) {
       controller.fxmlLoader(fxmlLoader);
     });
     
     Object.keys(controller).forEach(function(field){
       if(typeof controller[field] == 'function'){
         // Add method for current controller
-        jsController.addMethod(field ,function(argArray){
+        controllerAdapter.addMethod(field ,function(argArray){
           controller[field](argArray);
         });
       } else if (isNestedControllerField(field)) {
-        jsController.addNestedController(
+        controllerAdapter.addNestedController(
           field.slice(0, -("Controller".length)),
-          buildJsController(controller[field])
+          buildControllerAdapter(controller[field])
         );
       }
     });
-    return jsController;
+    return controllerAdapter;
   }
   
   function isNestedControllerField(fieldName){
@@ -207,6 +203,8 @@
   
   // Properties Utilities
   // --------------------
+
+  // TODO: Move these to an extension
   
   fx.observable = function (initialValue) {
     // TODO: Handle exceptional initialValue values (null, undefined)
@@ -217,10 +215,10 @@
     }
     
     if (typeof initialValue === 'undefined') {
-      Packages.com.github.jsfx.JsObservable(null);
+      Packages.com.github.crossfx.ObservableAdapter(null);
     }
     
-    return new Packages.com.github.jsfx.JsObservable(initialValue);
+    return new Packages.com.github.crossfx.ObservableAdapter(initialValue);
   };
   
   fx.computed = function (computer) {
@@ -232,57 +230,48 @@
   };
   
   fx.bind = function (observable) {
-    var registrar = Packages.com.github.jsfx.JsDependencyRegistrar.instance();
+    var registrar = Packages.com.github.crossfx.DependencyRegistrar.instance();
     registrar.registerDependency(observable);
     return observable.value;
   }
   
   function Computed(computer) {
-    Computed.Class = Computed.Class || Packages.com.github.jsfx.JsComputed;
+    Computed.Class = Computed.Class || Packages.com.github.crossfx.ComputedAdapter;
     return new Computed.Class(computer);
   }
   
   function WriteableComputed(computer) {
-    WriteableComputed.Class = WriteableComputed.Class || Packages.com.github.jsfx.JsWriteableComputed;
-    return new WriteableComputed.Class(computer.read, computer.write);
+    WriteableComputed.Class = WriteableComputed.Class || Packages.com.github.crossfx.WriteableComputedAdapter;    return new WriteableComputed.Class(computer.read, computer.write);
   }
   
   // Chooser Helpers
   // ---------------
   
-  fx.chooseFile = function (stageTitle, opt) {
+  fx.openFile = function (stageTitle) {
     var stage = new fx.Stage();
     var chooser = new fx.FileChooser();
-    
-    // default action
-    openDialog = function (title) { return chooser.showOpenDialog(title); };
-    
-    if (opt && opt.dialog && opt.dialog == "save") {
-      openDialog = function (title) { return chooser.showSaveDialog(title); };
-    }
-    
-    if(stageTitle) chooser.title = stageTitle;
-    return openDialog(stage);
+    if (stageTitle) chooser.title = stageTitle;
+    return chooser.showOpenDialog(stage);
   };
   
-  fx.saveFile = function () {
+  fx.saveFile = function (stageTitle) {
     var stage = new fx.Stage();
     var chooser = new fx.FileChooser();
-    if(stageTitle) chooser.title = stageTitle;
+    if (stageTitle) chooser.title = stageTitle;
     return chooser.showSaveDialog(stage);
   };
   
   fx.chooseDirectory = function (stageTitle) {
     var stage = new fx.Stage();
-    if(stageTitle) stage.title = stageTitle;
-    var dirChooser = new fx.DirectoryChooser();
-    return dirChooser.showDialog(stage);
+    var chooser = new fx.DirectoryChooser();
+    if (stageTitle) chooser.title = stageTitle;
+    return chooser.showDialog(stage);
   };
   
   // Listener Helpers
   // ----------------
   
-  fx.addChangeListener= function (property, callback) {
+  fx.addChangeListener = function (property, callback) {
     property.addListener(new fx.ChangeListener({
       changed: callback
     }));
@@ -303,8 +292,8 @@
   // application thread
   function importJavaFxTypes () {
     
-    // com.github.jsfx
-    fx.JsFXMLLoader = Packages.com.github.jsfx.JsFXMLLoader;
+    // com.github.crossfx
+    fx.CrossFxmlLoader = Packages.com.github.crossfx.CrossFxmlLoader;
     
     // javafx.application
     fx.Platform = Packages.javafx.application.Platform;
