@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/crossfx.iml" filepath="$PROJECT_DIR$/crossfx.iml" />
+      <module fileurl="file://$PROJECT_DIR$/splatfx.iml" filepath="$PROJECT_DIR$/splatfx.iml" />
     </modules>
   </component>
 </project>
