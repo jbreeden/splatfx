@@ -94,10 +94,6 @@ import sun.reflect.misc.MethodUtil;
 import sun.reflect.misc.ReflectUtil;
 import sun.security.util.SecurityConstants;
 
-/**
- * Loads an object hierarchy from an XML document.
- * @since JavaFX 2.0
- */
 public class SplatFxmlLoader {
     // Abstract base class for elements
     private abstract class Element {

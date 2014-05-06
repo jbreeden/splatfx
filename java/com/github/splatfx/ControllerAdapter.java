@@ -26,8 +26,12 @@ import java.util.HashMap;
 import java.util.Set;
 
 /**
- *
- * @author jared
+ * ControllerAdapter essentially holds a hash of event handlers, and a
+ * hash of nested controllers. During the FXML load, the handlers and
+ * controllers are looked up in these hashes. This differs from the
+ * reflective approach that the JRE's built-in FXMLLoader uses to bind
+ * to controllers, providing a simple means for alternative JVM languages
+ * to support FXML.
  */
 public class ControllerAdapter {
     private SplatFxmlLoader fxmlLoader;

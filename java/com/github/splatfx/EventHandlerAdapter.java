@@ -24,9 +24,12 @@ package com.github.splatfx;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 
-/**
- *
- * @author jared
+/*
+ * Trivial EventHandler wrapper.
+ * TODO: Can this be removed?
+ * I believe this was helping one of the target JavaScript engines
+ * at some point, but may have been refactored beyond the point of
+ * uselessness.
  */
 public class EventHandlerAdapter implements EventHandler{
 

@@ -21,6 +21,9 @@
 
 package com.github.splatfx;
 
+/**
+ * Simple callback type accepting one parameter.
+ */
 public interface Callback1 {
   Object call(Object param);
 }

@@ -23,6 +23,12 @@ package com.github.splatfx;
 
 import javafx.stage.Stage;
 
+/**
+ * ApplicationAdapter provides a callback-based alternative to extending
+ * the javafx.application.Application class. This makes it easier for some
+ * alternative JVM languages with poor inheritance utilities but simple SAM
+ * conversion to construct and launch a JavaFX application.
+ */
 public class ApplicationAdapter extends javafx.application.Application {
   private static Callback1 onStartAction;
   
